@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  backend:
+    image: my-mm-backend:latest
+    container_name: mm-backend
+    ports:
+      - "9000:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mmdb
+      - SPRING_DATASOURCE_USERNAME=mmuser
+      - SPRING_DATASOURCE_PASSWORD=1234
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: mm-db
+    environment:
+      - POSTGRES_DB=mmdb
+      - POSTGRES_USER=mmuser
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"

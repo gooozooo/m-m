@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>OCR + AI 소비내역 파서</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 20px auto; }
+    textarea { width: 100%; height: 100px; }
+    .section { margin-bottom: 32px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
+    .section h2 { margin-top: 0; }
+    pre { background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto; }
+    button { padding: 8px 16px; margin-top: 8px; cursor: pointer; }
+    input[type="file"] { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>카카오페이 / 네이버페이 캡처 분석 데모</h1>
+
+  <div class="section">
+    <h2>1. 텍스트 → AI 파싱 (/api/ocr/parse-ai)</h2>
+    <textarea id="rawText" placeholder="카카오페이 결제 스타벅스 5400원"></textarea><br/>
+    <button onclick="parseText()">AI로 파싱</button>
+    <h3>응답 결과</h3>
+    <pre id="parseResult">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>2. 이미지 → OCR + 규칙기반 (/api/ocr/preview)</h2>
+    <input type="file" id="filePreview" accept="image/*" /><br/>
+    <button onclick="previewImage()">OCR 미리보기</button>
+    <h3>응답 결과</h3>
+    <pre id="previewResult">[]</pre>
+  </div>
+
+  <div class="section">
+    <h2>3. 이미지 → OCR + AI (/api/ocr/preview-ai)</h2>
+    <input type="file" id="filePreviewAi" accept="image/*" /><br/>
+    <button onclick="previewImageAi()">OCR + AI 미리보기</button>
+    <h3>응답 결과</h3>
+    <pre id="previewAiResult">{}</pre>
+  </div>
+
+  <script>
+    async function parseText() {
+      const rawText = document.getElementById('rawText').value;
+      const res = await fetch('/api/ocr/parse-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText })
+      });
+      const data = await res.json();
+      document.getElementById('parseResult').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function previewImage() {
+      const fileInput = document.getElementById('filePreview');
+      if (!fileInput.files.length) {
+        alert('이미지 파일을 선택하세요');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      const res = await fetch('/api/ocr/preview', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('previewResult').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function previewImageAi() {
+      const fileInput = document.getElementById('filePreviewAi');
+      if (!fileInput.files.length) {
+        alert('이미지 파일을 선택하세요');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      const res = await fetch('/api/ocr/preview-ai', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('previewAiResult').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
